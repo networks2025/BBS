@@ -1,0 +1,37 @@
+How NAT Works:
+
+    Outbound Traffic (Private → Public):
+        When a device in the private network (e.g., 192.168.1.100) sends a packet to the internet:
+            The packet has:
+                Source IP: The private IP (192.168.1.100).
+                Source Port: A randomly chosen port (e.g., 54321).
+                Destination IP: The public server’s IP (e.g., 93.184.216.34).
+            The router performing NAT:
+                Replaces the source IP (private) with its public IP (e.g., 203.0.113.1).
+                Keeps track of this translation in a NAT table.
+            The packet is sent out to the destination server.
+
+    Inbound Traffic (Public → Private):
+        When the server replies, it sends a packet back to the router’s public IP (e.g., 203.0.113.1) with:
+            Destination Port: The port the router had assigned (54321).
+        The router:
+            Looks up its NAT table to see which internal (private) IP and port this packet was meant for.
+            Translates the destination IP and port back to the original private IP (192.168.1.100:54321).
+            Forwards the packet to the appropriate device on the private network.
+
+_____________________________________________________
+
+
+    tatic NAT (1:1):
+        A specific private IP is mapped to a specific public IP.
+        Example: 192.168.1.10 → 203.0.113.5 always.
+    Dynamic NAT (Many:Many):
+        A pool of private IPs is mapped to a pool of public IPs.
+        Example: Any device can be dynamically assigned one of several public IPs when connecting to the internet.
+
+Masquerading
+
+    Dynamic NAT for Many:1 Mapping:
+        Masquerading is a many-to-one NAT technique where multiple devices share a single public IP.
+        Used in home networks or small businesses with one dynamic public IP (like those assigned by ISPs).
+

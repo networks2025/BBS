@@ -1,0 +1,140 @@
+hardware layer: ethernet
+Ether(եթեր): Ethernet named after the disproven 'luminiferous ether', the universal carrier of light waves. referenced in the 'the poison belt' by AKD.
+developed at Xerox PARC.
+https://en.wikipedia.org/wiki/Ethernet
+The method used was similar to those used in radio systems, with the common cable providing the communication channel.
+
+wifi cable: https://www.reddit.com/r/techsupportgore/comments/46i93i/my_friend_at_uni_found_a_wifi_cable/
+
+wifi (or correct: WLAN) is ethernet, same protocol.
+
+That means you can have an ethernet antenna but unlikely a wireless wire.
+
+what the switch does? the switchboard picture.
+
+the difference between the switch and hub.
+
+Half duplex vs Full duplex:
+
+Half-duplex is used to describe communication where only... one side can talk at a time. Once one side has finished transmitting its data, the other side can respond. Only one node can talk at a time. If both try to talk at the same time, a collision will occur on the network.
+
+As you can understand, this method of communication is not very efficient and requires more time to send/receive larger amounts of data.
+
+Older networks used to work in half-duplex mode, due to the constraints of the network medium (coax cable) and hardware equipment (hubs).
+
+On the other hand, full-duplex is used to describe communication where both sides are able to send and receive data at the same time. In these cases, there is no danger of a collision and therefore the transfer of data is completed much faster.
+
+Today, all networks make use of switches (rather than hubs) and UTP Ethernet cabling, which allow full-duplex communication between all connected hosts.
+
+http://searchnetworking.techtarget.com/answer/The-difference-between-half-duplex-and-full-duplex
+
+Packets, Segments, Frames.
+
+*    Segments are units of data in the Transport Layer (TCP/UDP in case of the Internet)
+
+*    Packets or Datagrams are units of data in the Network Layer (IP in case of the Internet)
+
+*    Frames are units of data in the Link Layer (e.g. Wifi, Bluetooth, Ethernet, etc).
+
+Arp table.
+
+Internet layer: IP addresses, routing.
+draw!
+
+Each interface on a host is given an unique IP address.
+
+IP address in NOT the hardware address. IP is a logical network that overlays & connects physical networks.
+
+IPv4: 32 bit number.
+
+IPv6: 128 bit number.
+
+Transport layer: https://en.wikipedia.org/wiki/Transmission_Control_Protocol
+TCP header diagram.
+
+Domain name -> address translation.
+
+DNS
+
+Hierarchical human friendly names.
+User-level  network service to look up IP domain names.
+Cache to avoid future lookups. There is a cache on a client system, and on a DNS server.
+Kernel's network drivers do not handle domain names.
+
+ARP
+
+Address resolution protocol.
+
+IP -> Ethernet address translation
+
+Routes.
+
+traceroute.
+
+
+Connection establishment
+
+0.  Establish connection         |     Dial phone number
+1.  Negotiate protocol           |     Decide on a language
+2.  Exchange data                |     Talk
+3.  Terminate connection         |     Hung up
+
+
+TCP:
+(Transmission control protocol)
+
+* Connection oriented service - OS keeps state.
+* Full duplex connection: both sides can send messages over the same link.
+* Reliable data transfer: protocol handles retransmission.
+* In-order data transfer: protocol keeps track of sequence numbers.
+
+UDP:
+(User datagram protocol)
+
+* Connectionless service (lightweight transport layer over IP)
+* Data may be lost.
+* Data may arrive out of sequence.
+* Checksum for corrupt data: OS drops bad packets.
+
+
+Port numbers:
+
+16 bit value.
+* Allows application to application communication.
+* Identifies specific data stream.
+
+Some services use port numbers 0-1023.
+ftp: 21
+ssh: 22
+telnet: 23
+smtp: 25
+http: 80
+ntp: 123/udp
+
+
+/etc/services.
+
+
+To establish a connection, TCP uses a three-way handshake. Before a client attempts to connect with a server, the server must first bind to and listen at a port to open it up for connections: this is called a passive open. Once the passive open is established, a client may initiate an active open. To establish a connection, the three-way (or 3-step) handshake occurs:
+
+    SYN: The active open is performed by the client sending a SYN to the server. The client sets the segment's sequence number to a random value A.
+    SYN-ACK: In response, the server replies with a SYN-ACK. The acknowledgment number is set to one more than the received sequence number i.e. A+1, and the sequence number that the server chooses for the packet is another random number, B.
+    ACK: Finally, the client sends an ACK back to the server. The sequence number is set to the received acknowledgement value i.e. A+1, and the acknowledgement number is set to one more than the received sequence number i.e. B+1.
+
+At this point, both the client and server have received an acknowledgment of the connection. The steps 1, 2 establish the connection parameter (sequence number) for one direction and it is acknowledged. The steps 2, 3 establish the connection parameter (sequence number) for the other direction and it is acknowledged. With these, a full-duplex communication is established.
+
+
+Connection termination:
+
+The connection termination phase uses a four-way handshake, with each side of the connection terminating independently. When an endpoint wishes to stop its half of the connection, it transmits a FIN packet, which the other end acknowledges with an ACK. Therefore, a typical tear-down requires a pair of FIN and ACK segments from each TCP endpoint. After the side that sent the first FIN has responded with the final ACK, it waits for a timeout before finally closing the connection, during which time the local port is unavailable for new connections; this prevents confusion due to delayed packets being delivered during subsequent connections.
+
+https://en.wikipedia.org/wiki/Transmission_Control_Protocol
+
+
+Standard paper, 1981: https://tools.ietf.org/html/rfc791
+
+Sockets
+========
+
+
+

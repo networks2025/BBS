@@ -1,0 +1,98 @@
+Telephony
+
+Pulse-Code Modulation
+
+* Analog voice signal sampled at 8kHz (8000 samples/second)
+* Each sample is quantized into 7 or 8 bits using ADC
+
+8000 x 7 = 5600 b/s or 56kb/s
+8000 x 8 = 6400 b/s or 64kb/s
+
+Nyquist-Shannon theorem
+
+To faithfully reconstruct a signal, the sampling rate must be at least twice the highest frequency of the signal
+
+https://en.wikipedia.org/wiki/Nyquist%E2%80%93Shannon_sampling_theorem
+
+The human voice generally spans up to 4 kHz for intelligibility. Sampling at 8 kHz ensures accurate reconstruction.
+
+Telephony still uses PCM for digital voice encoding, particularly the 64 kbps rate (8 bits × 8000 Hz). However, modern systems (e.g., VoIP, 4G, 5G) often use compression codecs (e.g., G.711, G.729, Opus) to reduce bandwidth requirements while maintaining voice quality.
+
+
+_________________________
+
+Application       SMTP/FTP 
+Presentation     MIME, JSON, XML                       objects
+Session             HTTP, TLS
+Transport          TCP, UDP, ICMP                            segments
+Network           IP                                                  datagrams      
+Data Link         ethernet mac, ppp, arp                  frames            switch
+Physical           usb, bt, 1000BaseT, wifi
+
+
+
+
+
+
+____________________________________________________________________
+
+Frames in Ethernet
+
+An Ethernet frame is a structured data unit used to transmit information between devices. It includes specific fields to ensure proper communication.
+Structure of an Ethernet Frame
+
+    Preamble (7 bytes):
+        A sequence of alternating 1s and 0s used to synchronize communication between sender and receiver.
+
+    Start Frame Delimiter (SFD, 1 byte):
+        Indicates the beginning of the frame.
+
+    Destination MAC Address (6 bytes):
+        The unique address of the recipient device.
+
+    Source MAC Address (6 bytes):
+        The unique address of the sender device.
+
+    Type/Length (2 bytes):
+        Indicates either the protocol type (e.g., IPv4, IPv6) or the length of the payload.
+
+    Payload/Data (46-1500 bytes):
+        The actual data being transmitted (e.g., part of a web page or file).
+
+    Frame Check Sequence (FCS, 4 bytes):
+        Contains a checksum to detect transmission errors.
+
+------------------
+
+    Minimum size: 64 bytes (to avoid collision ambiguity).
+    Maximum size: 1518 bytes (standard Ethernet) or higher with jumbo frames.
+
+
+Ethernet/data link addressing
+
+each interface has a MAC address, 48 bits.
+
+IP: IPv4 address is 32bit
+IPv6 address is 128bit
+
+
+Address translation:
+
+DNS
+
+ARP
+
+
+TCP/UDP segment has
+
+port number: 16 bit
+(imagine gates in the airport)
+
+cat /etc/services
+
+
+
+
+
+
+

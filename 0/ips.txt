@@ -1,0 +1,120 @@
+192.168.1.10 in binary is:
+
+11000000.10101000.00000001.00001010
+
+In binary, 255.255.255.0 looks like:
+
+11111111.11111111.11111111.00000000
+
+Class A:
+
+* First octet range: 1–126 (in dotted decimal)
+* Default Subnet Mask: 255.0.0.0
+* In binary, the first bit is 0
+* Designed for very large networks (lots of hosts).
+
+Class B:
+* First octet range: 128-191
+* Default Subnet Mask: 255.255.0.0
+* In binary, the first two bits are 10
+* Designed for medium-sized networks
+
+Class C:
+* First octet range: 192-223
+* Default Subnet Mask: 255.255.255.0
+* In binary, the first three bits are 110
+* Designed for smaller networks.
+
+ In modern usage, we don’t strictly rely on classes. Instead, we look at CIDR notation, like /8, /16, /24, etc.)
+
+
+Why is 255.255.255.0 the same as /24?
+
+IPv4 Has 32 Bits Total
+
+* An IPv4 address is 32 bits long. This is why you sometimes see “/32” used— that means all 32 bits are considered part of the network portion (which leaves 0 bits for hosts).
+
+* "/24" Means 24 Network Bits
+
+* "/24" (CIDR notation) means 24 of those 32 bits are the “network” portion of the address.
+    The remaining (32 − 24) = 8 bits are for the “host” portion within that network.
+
+24 Bits Set to 1 in Binary = 255.255.255.0
+
+    Each “octet” (the part between the dots) is 8 bits.
+    Writing out 24 bits as all 1s:
+    11111111.11111111.11111111.00000000
+    11111111.11111111.11111111.00000000 Converting each 8-bit part (octet) from binary to decimal:
+        11111111 = 255
+        11111111 = 255
+        11111111 = 255
+        00000000 = 0
+    So in dotted decimal form, 24 bits of 1 = 255.255.255.0.
+
+Hence, 255.255.255.0 is /24.
+
+-------------------------------------------------------
+
+Example: 255.255.255.252 (which is /30)
+
+In binary, 255.255.255.252 looks like:
+11111111.11111111.11111111.11111100
+
+If 2 bits are left for hosts, that means you have 22=4^2=4 addresses in that subnet:
+
+    Network address (all host bits 0)
+    2 usable host addresses (where the 2 bits can vary)
+    Broadcast address (all host bits 1)
+
+
+Once you “see” that you have X bits for network and Y bits for host, it becomes straightforward to calculate how many addresses per subnet and how they’re spaced.
+
+Network address and broadcast address
+
+For any given subnet, the number of usable host addresses is:
+
+    2^n - 2
+
+    where n is the number of bits for the host portion (i. e. 32 - prefix length).
+
+
+Example:
+
+ /24 (255.255.255.0)
+
+Host bits: 32-24=8
+
+Total IPs: 2^8 = 256
+
+Usable IPs: 256-2=254 (from 192.168.1.1 to 192.168.1.254)
+
+/30 (255.255.255.252)
+
+Host bits: 32 - 30 = 2.
+Total IPs: 2^2=4
+Usable Ips: 4-2=2 (useful for point to point links (between two routers))
+
+* very rarely /31 can be used, when you're sure there is no need in broadcast.
+
+0       00000000
+128     10000000
+192     11000000
+224     11100000
+240     11110000
+248     11111000
+252     11111100
+254     11111110
+255     11111111
+
+
+/8      255.0.0.0
+/16     255.255.0.0
+/24     255.255.255.0
+/25     255.255.255.128
+/26     255.255.255.192
+/27     255.255.255.224
+/28     255.255.255.240
+/29     255.255.255.248
+/30     255.255.255.252
+/31     255.255.255.254
+/32     255.255.255.255
