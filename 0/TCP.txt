@@ -1,0 +1,461 @@
+
+# TCP Connections Are Independent
+
+* Each new TCP connection is identified by a unique (source IP, source port, destination IP, destination port) tuple.
+* A client can open multiple TCP connections to the same server as long as it uses different source ports.
+* The old connection does not have to close before a new one is established.
+
+If a client tries to reuse the same source port while in TIME_WAIT, it must wait or choose another port.
+
+Problem:
+
+* If a client frequently opens and closes TCP connections without reusing them, it may run out of available ports.
+
+Good news:
+
+A TCP connection can be reused instead of closing.
+
+Persistent connections allow multiple requests over the same connection, reducing handshake overhead.
+
+Examples:
+
+* HTTP Keep-Alive (used in HTTP/1.1 and HTTP/2)
+** The same TCP connection is used for multiple file requests.
+
+* FTP Control Connection
+** The main connection stays open, and new data connections are created only when needed.
+
+Benefit:
+
+* Reduces the need for new TCP handshakes.
+* Improves efficiency for small file transfers.
+
+# What If the Old TCP Connection Hasn’t Closed, But We Open a New One?
+
+* The new connection works normally as long as it uses a different source port.
+* If using HTTP, the server may prefer reusing an existing connection if Keep-Alive is enabled.
+* Some firewalls or NAT devices may limit the number of active connections from a single IP.
+
+
+
+
+# IP Header (Layer 3)
+*  Contains source and destination IP addresses (IPv4 or IPv6)
+*  Has no concept of ports
+*  Used for routing packets across networks
+*  Contains protocol field, which indicates whether the payload is TCP, UDP, ICMP, etc.
+
+# TCP Header (Layer 4)
+*  Contains source port (2 bytes) and destination port (2 bytes)
+*  Responsible for end-to-end communication between applications
+*  Supports error detection and correction (checksum, retransmissions, etc.)
+*  Manages flow control and congestion control (e.g., via sequence numbers and acknowledgments)
+
+```
+cat /etc/services
+```
+
+https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+# Why Are Small Files Transferred Slower Over TCP?
+
+TCP has initial setup overhead and slow start behavior.
+
+## TCP Connection Setup (Three-Way Handshake Overhead)
+
+Before any data can be transferred, TCP must establish a connection between the sender and receiver using a three-way handshake:
+
+1. Client -> Server: SYN (synchronize) request
+2. Server -> Client: SYN-ACK (synchronize-acknowledge)
+3. Client -> Server: ACK (acknowledge)
+
+This adds extra delay before the actual file transfer starts.
+
+Example:
+Imagine sending a 10 KB file over TCP:
+
+* The three-way handshake takes ~1 round-trip time (RTT) before sending the first byte.
+* If the RTT is 100ms, then 100ms is spent just setting up the connection.
+* If the file transfers in just one or two packets, most of the time is spent on setup rather than actual transfer.
+
+## TCP Slow Start (Gradual Speed Increase)
+
+Once the connection is established, TCP does not send data at full speed immediately. Instead, it follows the Slow Start algorithm, which gradually increases the transmission rate to prevent congestion.
+
+### How Slow Start Works:
+
+* TCP starts by sending only a small amount of data (usually 10 segments in modern systems).
+* If the receiver acknowledges them successfully, TCP doubles the sending rate (exponential growth).
+* This continues until the network limit is reached.
+
+Problem for Small Files:
+
+* If a file is only a few KB, the transfer may finish before TCP reaches full speed.
+* TCP's slow start phase dominates, preventing the connection from reaching high speeds.
+
+Example
+
+* Large file (1 GB) → TCP slow start has time to ramp up to maximum throughput.
+* Small file (10 KB) → TCP doesn’t get the chance to increase speed before the transfer is over.
+
+## TLS/SSL Encryption Overhead (If Used)
+
+Why Are Small Files Transferred Slower Over TCP?
+
+Yes, you’re absolutely right! Small file transfers over TCP are slower compared to large files because TCP has initial setup overhead and slow start behavior. Here's why:
+1. TCP Connection Setup (Three-Way Handshake Overhead)
+
+Before any data can be transferred, TCP must establish a connection between the sender and receiver using a three-way handshake:
+
+1️⃣ Client → Server: SYN (synchronize) request
+2️⃣ Server → Client: SYN-ACK (synchronize-acknowledge)
+3️⃣ Client → Server: ACK (acknowledge)
+
+🚀 Problem for Small Files:
+
+    This adds extra delay before the actual file transfer starts.
+    If the file is very small, it might finish transferring immediately after the handshake, making the overhead more noticeable.
+
+🔹 Example:
+Imagine sending a 10 KB file over TCP:
+
+    The three-way handshake takes ~1 round-trip time (RTT) before sending the first byte.
+    If the RTT is 100ms, then 100ms is spent just setting up the connection.
+    If the file transfers in just one or two packets, most of the time is spent on setup rather than actual transfer.
+
+2. TCP Slow Start (Gradual Speed Increase)
+
+Once the connection is established, TCP does not send data at full speed immediately. Instead, it follows the Slow Start algorithm, which gradually increases the transmission rate to prevent congestion.
+How Slow Start Works:
+
+    TCP starts by sending only a small amount of data (usually 10 segments in modern systems).
+    If the receiver acknowledges them successfully, TCP doubles the sending rate (exponential growth).
+    This continues until the network limit is reached.
+
+🚀 Problem for Small Files:
+
+    If a file is only a few KB, the transfer may finish before TCP reaches full speed.
+    TCP's slow start phase dominates, preventing the connection from reaching high speeds.
+
+🔹 Example:
+
+    Large file (1 GB) → TCP slow start has time to ramp up to maximum throughput.
+    Small file (10 KB) → TCP doesn’t get the chance to increase speed before the transfer is over.
+
+3. TLS/SSL Encryption Overhead (If Used)
+
+If the transfer uses HTTPS, FTPS, or another encrypted protocol, there’s an extra handshake for encryption before data can be sent.
+
+Example:
+
+HTTPS requires a TLS handshake:
+
+1. Client and server exchange encryption parameters.
+2. Server sends its certificate
+3. A secure session is established.
+
+Problem for small files:
+
+* TLS handshake adds another 1-2 RTTs of delay.
+* For a very small file, the encryption setup may take longer than the actual file transfer.
+
+### TCP Connection Teardown (TIME_WAIT Delay)
+
+Why Are Small Files Transferred Slower Over TCP?
+
+Yes, you’re absolutely right! Small file transfers over TCP are slower compared to large files because TCP has initial setup overhead and slow start behavior. Here's why:
+1. TCP Connection Setup (Three-Way Handshake Overhead)
+
+Before any data can be transferred, TCP must establish a connection between the sender and receiver using a three-way handshake:
+
+1️⃣ Client → Server: SYN (synchronize) request
+2️⃣ Server → Client: SYN-ACK (synchronize-acknowledge)
+3️⃣ Client → Server: ACK (acknowledge)
+
+🚀 Problem for Small Files:
+
+    This adds extra delay before the actual file transfer starts.
+    If the file is very small, it might finish transferring immediately after the handshake, making the overhead more noticeable.
+
+🔹 Example:
+Imagine sending a 10 KB file over TCP:
+
+    The three-way handshake takes ~1 round-trip time (RTT) before sending the first byte.
+    If the RTT is 100ms, then 100ms is spent just setting up the connection.
+    If the file transfers in just one or two packets, most of the time is spent on setup rather than actual transfer.
+
+2. TCP Slow Start (Gradual Speed Increase)
+
+Once the connection is established, TCP does not send data at full speed immediately. Instead, it follows the Slow Start algorithm, which gradually increases the transmission rate to prevent congestion.
+How Slow Start Works:
+
+    TCP starts by sending only a small amount of data (usually 10 segments in modern systems).
+    If the receiver acknowledges them successfully, TCP doubles the sending rate (exponential growth).
+    This continues until the network limit is reached.
+
+🚀 Problem for Small Files:
+
+    If a file is only a few KB, the transfer may finish before TCP reaches full speed.
+    TCP's slow start phase dominates, preventing the connection from reaching high speeds.
+
+🔹 Example:
+
+    Large file (1 GB) → TCP slow start has time to ramp up to maximum throughput.
+    Small file (10 KB) → TCP doesn’t get the chance to increase speed before the transfer is over.
+
+3. TLS/SSL Encryption Overhead (If Used)
+
+If the transfer uses HTTPS, FTPS, or another encrypted protocol, there’s an extra handshake for encryption before data can be sent.
+
+🔹 Example:
+
+    HTTPS requires a TLS handshake:
+        Client and server exchange encryption parameters.
+        Server sends its certificate.
+        A secure session is established.
+
+🚀 Problem for Small Files:
+
+    TLS handshake adds another 1-2 RTTs of delay.
+    For a very small file, the encryption setup may take longer than the actual file transfer.
+
+4. File System & Application Overhead
+
+    If the file is being read from disk, access time (especially on HDDs) can add delays.
+    The application may delay sending data while processing the request.
+    OS buffering and network stack overhead also introduce small delays.
+
+5. TCP Connection Teardown (TIME_WAIT Delay)
+
+After sending the small file, TCP doesn’t immediately close the connection. Instead, it enters the TIME_WAIT state for a short period (typically 30-60 seconds) to ensure delayed packets don’t interfere with new connections.
+
+* If a new file is requested immediately after, a new TCP connection must be created, adding more delay.
+
+
+
+on error correction:
+
+CRC Only Protects Individual Frames
+
+* Ethernet CRC operates at Layer 2 (Data Link Layer) and only ensures that a single Ethernet frame is error-free.
+* If a frame is corrupted, it is discarded, but upper layers do not know if a packet was lost.
+* Ethernet CRC works hop-by-hop (each switch/router checks and removes it).
+* A corrupted packet might be dropped at a network switch, but higher layers still need a way to detect and recover missing data.
+* IP (Layer 3) does not guarantee delivery; it just forwards packets. Packets may be lost, duplicated, or arrive out of order.
+* TCP is responsible for retransmitting lost data and reordering packets.
+* Not all network links use Ethernet (e.g., Wi-Fi, cellular networks), and some may have weaker error detection mechanisms.
+
+
+# Why Doesn't Ethernet Have Error Notifications?
+
+* Ethernet is designed to be a simple and fast protocol.
+* You may decide to not have error detection on higher level protocols(for example streaming, voice over ip, etc).
+
+
+# Error Detection in TCP
+A. TCP Checksum
+
+* TCP includes a 16-bit checksum in its header.
+* The checksum is computed over:
+** TCP header
+** TCP payload (data)
+** A pseudo-header (which includes IP addresses and protocol information for extra verification).
+
+* The receiver recalculates the checksum and compares it with the one sent in the TCP header.
+** If checksums match -> the segment is considered valid.
+** If checksums don’t match -> the segment is discarded.
+
+Limitation: The TCP checksum is relatively weak and may not catch all errors (e.g., certain rare bit-flip errors).
+
+# Error Correction in TCP
+Unlike some lower-level protocols, TCP does not correct errors in a corrupted packet itself. Instead, it relies on retransmissions to fix errors.
+
+A. Automatic Retransmission (ARQ - Automatic Repeat reQuest)
+
+TCP uses ACKs (Acknowledgments) and timeouts to ensure lost or corrupted data is resent.
+
+How it works:
+
+1. Sender transmits a segment and waits for an acknowledgment (ACK).
+2. Receiver checks the checksum:
+
+* If the segment is valid, it sends an ACK (Acknowledgment) for the next expected byte.
+* If the segment is corrupt, it is discarded, and the sender does not receive an ACK.
+
+3. If the sender does not receive an ACK within a timeout, it retransmits the missing segment.
+____________________________________________________________-
+
+## Advanced Error Handling Techniques
+
+TCP has three major retransmission techniques to handle packet loss and errors efficiently:
+
+A. Timeout-Based Retransmission
+* If an ACK is not received within a certain timeout (Retransmission Timeout or RTO), the sender assumes the packet was lost and resends it.
+* The RTO value is dynamically adjusted based on network conditions.
+
+B. Fast Retransmit (Triggered by Duplicate ACKs)
+* If a packet is lost, the receiver will keep sending duplicate ACKs for the last correctly received segment.
+* If the sender gets three duplicate ACKs, it immediately retransmits the missing packet before the timeout occurs (to reduce delays).
+
+C. Selective Acknowledgment (SACK)
+* Normally, TCP only acknowledges up to the last received in-order packet.
+* With SACK, the receiver can tell the sender which specific bytes were received and which were missing.
+* This allows TCP to retransmit only the missing segments, instead of resending everything after a lost packet.
+
+# Ensuring Correct Order of Packets
+
+TCP must reorder out-of-sequence packets before delivering data to the application.
+
+* Each TCP segment has a sequence number.
+* If packets arrive out of order, the receiver buffers them until the missing segments arrive.
+* The receiver sends ACKs to indicate the next expected byte, helping the sender manage retransmissions efficiently.
+
+# Congestion Control to Avoid Excessive Retransmissions
+
+If TCP detects many lost packets, it assumes the network is congested and slows down transmission to reduce further losses.
+
+
+
+
+
+
+
+
+# ACK
+
+How the TCP ACK Number Works
+
+Each TCP segment has:
+
+* A Sequence Number (seq) -> the byte number of the first byte in that segment.
+* An Acknowledgment Number (ack) -> the next expected byte from the sender.
+
+Example Scenario (Normal Case - No Packet Loss)
+
+1. Sender sends: Seq = 1, 2 KB of data
+2. Receiver successfully receives it and replies: ACK = 2049 (meaning “I got everything up to byte 2048; send me byte 2049 next”)
+3. Sender sends: Seq = 2049, 2 KB of data
+4. Receiver acknowledges: ACK = 4097
+
+# IMPORTANT: ACK number means "send me this byte next," not "I received this packet successfully".
+
+# What Happens When a Packet is Lost or Corrupted?
+
+## Case A: Corrupted Packet (Detected via Checksum)
+
+* If a segment arrives corrupted, the receiver discards it.
+* It does not send an ACK for it.
+* The sender does not receive an expected ACK, so it retransmits the missing packet after a timeout.
+
+## Case B: Packet is Lost
+* Example: If the packet with Seq = 2049 is lost, the receiver never gets it, so it keeps waiting.
+* The receiver continues to send duplicate ACKs for the last correctly received byte.
+* The sender detects multiple duplicate ACKs (ACK = 2049, ACK = 2049, ACK = 2049…) and performs Fast Retransmit (resending the lost segment before timeout).
+
+#  TCP Selective Acknowledgment (SACK) (More Efficient)
+
+By default, TCP only acknowledges contiguous, in-order data.
+However, with Selective Acknowledgment (SACK):
+
+* The receiver can say which specific bytes were received and which are missing.* This helps in cases where multiple packets are lost.
+
+## Example with SACK
+
+1. Sender sends: Seq = 1, Seq = 2049, Seq = 4097, Seq = 6145
+2. Packet Seq = 2049 is lost.
+3. Receiver receives: Seq = 1, Seq = 4097, Seq = 6145
+4. Receiver sends: ACK = 2049 (waiting for it) + SACK option {4097-8193 received}
+5. Sender only retransmits the missing Seq = 2049 instead of everything after it.
+
+# Summary
+* TCP ACK contains the number of the next expected byte, not a list of received packets.
+* If a packet is corrupted or lost, it is discarded, and the receiver does not acknowledge it.
+* The sender retransmits missing data if an expected ACK does not arrive.
+* Duplicate ACKs trigger Fast Retransmit to speed up recovery.
+* SACK (Selective Acknowledgment) improves efficiency by only requesting missing packets.
+
+
+# How many ACKs per TCP Segment?
+
+## Normal Case: One ACK per TCP Segment (Delayed ACKs)
+
+* Typically, one ACK is sent for every two received TCP segments (this is called Delayed ACK).
+* The receiver waits for a short time (usually 40 ms in Linux) before sending an ACK, hoping to acknowledge multiple packets at once.
+* This reduces network congestion by reducing the number of ACK packets.
+
+Example (Delayed ACK)
+
+1. Sender sends Packet 1 (Seq = 1, 1000 bytes)
+2. Sender sends Packet 2 (Seq = 1001, 1000 bytes)
+3. Receiver delays sending an ACK until it gets Packet 2.
+4. Receiver sends one ACK for both (ACK = 2001).
+
+So 1 ACK per every two packets.
+
+Why?
+
+* Reduces the number of small ACK packets.
+* Helps avoid unnecessary congestion.
+
+When does the receiver send an ACK immediately?
+
+* If only one segment arrives (no second segment to batch the ACK).
+* If there's a gap in sequence numbers (suggesting packet loss).
+* If Nagle's algorithm is disabled (used to reduce small packet overhead).
+
+
+## Multiple ACKs for a Single Segment (When There’s Loss)
+
+* If a segment is lost, the receiver keeps sending duplicate ACKs for the last correctly received segment.
+* This tells the sender that something is missing.
+
+Example (Duplicate ACKs for Lost Packet)
+
+1. Sender sends:
+* Packet 1 (Seq = 1, 1000 bytes)
+* Packet 2 (Seq = 1001, 1000 bytes)
+* Packet 3 (Seq = 2001, 1000 bytes) (Lost!)
+* Packet 4 (Seq = 3001, 1000 bytes)
+
+2. Receiver gets Packet 1 and 2, but Packet 3 is lost.
+
+3. Receiver keeps sending duplicate ACKs for ACK = 2001 every time it gets a new segment.
+
+4. If the sender gets 3 duplicate ACKs (ACK = 2001), it performs Fast Retransmit and resends Packet 3.
+
+## Selective Acknowledgment (SACK) Can Acknowledge Multiple Segments at Once
+
+* With SACK (Selective Acknowledgment), the receiver can tell the sender which parts of the data it received and which are missing.
+
+* This avoids unnecessary retransmissions.
+
+Example (SACK)
+
+1. Sender sends:
+* Packet 1 (Seq = 1)
+* Packet 2 (Seq = 1001)
+* Packet 3 (Seq = 2001) (Lost!)
+* Packet 4 (Seq = 3001)
+* Packet 5 (Seq = 4001)
+
+2. Receiver gets Packet 1, 2, 4, and 5.
+
+3. Receiver sends:
+* ACK = 2001 (still missing this)
+* SACK option: {3001-5001 received}
+
+4. Sender retransmits only Packet 3, instead of everything after it.
+
+Result: One ACK acknowledges multiple segments with gaps.
+
+
+---------------------
+To recap:
+
+* Normally, one ACK per two segments (Delayed ACKs).
+* If a segment is lost, multiple duplicate ACKs are sent to trigger Fast Retransmit.
+* With SACK, one ACK can acknowledge multiple non-contiguous segments.
+* TCP optimizes ACK frequency based on network conditions.
+
+
+
