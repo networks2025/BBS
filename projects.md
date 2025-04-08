@@ -61,6 +61,14 @@ misfin is a very simple email protocol.
 
 ui or console program that can receive .gmi and other files, render the page, go by links.
 
+## fast sender/receiver of many files
+since we learned that TCP is not optimal for small files, write a program which will send lots of small files in one stream, so on one end it should concatenate files on the fly and send, on the receiving side it should separate the files and save them.
+
+## simple vpn
+both client and the server open vpn0 interface and the socket.
+then each of them reads from vpn0 and sends to the socket and vice versa.
+it should also apply basic, even if very primitive encryption.
+
 ## Improve my Linux Oberon networking interface.
 
 I implemented procedures:
