@@ -69,6 +69,10 @@ both client and the server open vpn0 interface and the socket.
 then each of them reads from vpn0 and sends to the socket and vice versa.
 it should also apply basic, even if very primitive encryption.
 
+# gocomics.com or some other website scraper
+do a program which given the stream, let's say https://gocomics.com/pearlsbeforeswine, will figure out latest image, and show/download it.
+then will have a button for previous and next image, will figure out how to get the previous image, and show that too.
+
 ## Improve my Linux Oberon networking interface.
 
 I implemented procedures:
